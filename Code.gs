@@ -92,6 +92,25 @@ function fetchAllDatabases() {
   return all;
 }
 
+// === LOOKUP SINGLE DATABASE (manual add) ===
+
+function lookupDatabase(idOrUrl) {
+  var id = idOrUrl;
+  var m = idOrUrl.match(/([a-f0-9]{32})(?:\?|$|#)/i);
+  if (m) id = m[1];
+
+  try {
+    var data = notion('get', '/databases/' + id);
+    var title = '';
+    if (data.title && data.title.length > 0) {
+      title = data.title.map(function(t) { return t.plain_text; }).join('');
+    }
+    return { id: data.id, title: title || 'Untitled' };
+  } catch (e) {
+    return null;
+  }
+}
+
 // === SAVE SELECTION ===
 
 function getSavedSelection() {

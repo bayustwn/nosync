@@ -175,6 +175,14 @@
       font-weight: 500;
       line-height: 1.6;
     }
+    .manual-box {
+      margin-bottom: 10px;
+      padding: 12px;
+      background: #f8f9fb;
+      border-radius: 10px;
+      border: 1px dashed #d1d5db;
+    }
+    .manual-box .row { display:flex; gap:6px; }
     .footer {
       display: flex;
       gap: 8px;
@@ -221,12 +229,20 @@
   <!-- Database section -->
   <div id="dbSection" class="hide">
     <div class="db-controls">
-      <div style="display:flex;gap:6px;">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
         <button class="btn btn-secondary btn-sm" onclick="selAll(true)">Pilih Semua</button>
         <button class="btn btn-secondary btn-sm" onclick="selAll(false)">Hapus</button>
         <button class="btn btn-secondary btn-sm" onclick="reconnect()">↻ Refresh</button>
+        <button class="btn btn-secondary btn-sm" id="btnManual" onclick="showManual()">+ Manual</button>
       </div>
       <span class="db-count" id="dbCount">0/0</span>
+    </div>
+    <div id="manualBox" class="hide manual-box">
+      <div class="row">
+        <input type="text" id="manualUrl" placeholder="https://notion.so/... atau ID database" style="flex:1;padding:8px 12px;font-size:12px;" />
+        <button class="btn btn-primary btn-sm" onclick="addManual()">Tambah</button>
+      </div>
+      <div id="logManual" class="log log-info" style="margin-top:6px;font-size:11px;">Paste URL atau ID database Notion, klik Tambah.</div>
     </div>
     <div class="search-box">
       <input type="text" id="search" placeholder="Cari..." oninput="filterDB()" />
@@ -322,6 +338,53 @@
     function reconnect() {
       document.getElementById('dbList').innerHTML = '<div class="empty">Memuat ulang...</div>';
       fetchDBs();
+    }
+
+    function showManual() {
+      var box = document.getElementById('manualBox');
+      box.classList.toggle('hide');
+      if (!box.classList.contains('hide')) document.getElementById('manualUrl').focus();
+    }
+
+    function addManual() {
+      var val = document.getElementById('manualUrl').trim();
+      if (!val) { manualLog('Masukkan URL atau ID', 'err'); return; }
+
+      var id = val;
+      // Extract ID from URL
+      var m = val.match(/([a-f0-9]{32})(?:\?|$|#)/i);
+      if (m) id = m[1];
+
+      manualLog('Mencari database...', 'info');
+      google.script.run
+        .withSuccessHandler(function(db) {
+          if (!db) { manualLog('Database tidak ditemukan atau akses ditolak', 'err'); return; }
+          // Add to list
+          var list = document.getElementById('dbList');
+          var sheet = db.title.replace(/[\/\\\?\*\[\]]/g, '_');
+          var div = document.createElement('div');
+          div.className = 'db-item';
+          div.dataset.id = db.id;
+          div.innerHTML =
+            '<input type="checkbox" checked onchange="updCount()" />' +
+            '<div class="db-name">' + esc(db.title) + '</div>' +
+            '<div class="db-sheet"><input type="text" value="' + esc(sheet) + '" onchange="updCount()" /></div>' +
+            '<div class="db-type"><select class="public" onchange="updType(this)"><option value="public">Public</option><option value="private">Private</option></select></div>';
+          list.insertBefore(div, list.firstChild);
+          updCount();
+          manualLog('✓ ' + db.title + ' ditambahkan', 'ok');
+          document.getElementById('manualUrl').value = '';
+        })
+        .withFailureHandler(function(e) {
+          manualLog('Error: ' + e.message, 'err');
+        })
+        .lookupDatabase(id);
+    }
+
+    function manualLog(msg, type) {
+      var el = document.getElementById('logManual');
+      el.className = 'log log-' + type;
+      el.textContent = msg;
     }
 
     function filterDB() {
