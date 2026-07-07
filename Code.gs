@@ -22,7 +22,7 @@ function onOpen() {
 
 function showSetupDialog() {
   var html = HtmlService.createHtmlOutputFromFile('SetupDialog')
-    .setWidth(600).setHeight(520);
+    .setWidth(600).setHeight(600);
   SpreadsheetApp.getUi().showModalDialog(html, 'Notion Sync');
 }
 
@@ -66,31 +66,44 @@ function testConnection(apiKey) {
 
 function fetchAllDatabases() {
   var all = {};
-  var cursor = null;
 
+  // Step 1: Get all pages the integration has access to
+  var pages = [];
+  var cursor = null;
   while (true) {
     var body = {
-      filter: { value: 'database', property: 'object' },
+      filter: { value: 'page', property: 'object' },
       sort: { direction: 'ascending', timestamp: 'last_edited_time' },
       page_size: 100,
     };
     if (cursor) body.start_cursor = cursor;
-
     var data = notion('post', '/search', body);
-    (data.results || []).forEach(function(db) {
-      if (all[db.id]) return;
-      var title = '';
-      if (db.title && db.title.length > 0) {
-        title = db.title.map(function(t) { return t.plain_text; }).join('');
-      }
-      all[db.id] = { id: db.id, title: title || 'Untitled' };
+    (data.results || []).forEach(function(p) {
+      if (!all[p.id]) pages.push(p.id);
     });
-
     if (!data.has_more) break;
     cursor = data.next_cursor;
   }
 
-  return Object.keys(all).sort().map(function(k) { return all[k]; }).sort(function(a, b) {
+  // Step 2: Scan each page for child databases
+  pages.forEach(function(pageId) {
+    try {
+      var blocks = notion('get', '/blocks/' + pageId + '/children?page_size=100');
+      (blocks.results || []).forEach(function(block) {
+        if (block.type === 'child_database') {
+          var title = '';
+          if (block.child_database && block.child_database.title) {
+            title = block.child_database.title;
+          }
+          if (!all[block.id]) {
+            all[block.id] = { id: block.id, title: title || 'Untitled' };
+          }
+        }
+      });
+    } catch (e) {}
+  });
+
+  return Object.keys(all).map(function(k) { return all[k]; }).sort(function(a, b) {
     return a.title.localeCompare(b.title);
   });
 }
