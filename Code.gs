@@ -65,31 +65,34 @@ function testConnection(apiKey) {
 // === FETCH ALL DATABASES ===
 
 function fetchAllDatabases() {
-  var all = [];
+  var all = {};
   var cursor = null;
 
   while (true) {
     var body = {
       filter: { value: 'database', property: 'object' },
+      sort: { direction: 'ascending', timestamp: 'last_edited_time' },
       page_size: 100,
     };
     if (cursor) body.start_cursor = cursor;
 
     var data = notion('post', '/search', body);
     (data.results || []).forEach(function(db) {
+      if (all[db.id]) return;
       var title = '';
       if (db.title && db.title.length > 0) {
         title = db.title.map(function(t) { return t.plain_text; }).join('');
       }
-      all.push({ id: db.id, title: title || 'Untitled' });
+      all[db.id] = { id: db.id, title: title || 'Untitled' };
     });
 
     if (!data.has_more) break;
     cursor = data.next_cursor;
   }
 
-  all.sort(function(a, b) { return a.title.localeCompare(b.title); });
-  return all;
+  return Object.keys(all).sort().map(function(k) { return all[k]; }).sort(function(a, b) {
+    return a.title.localeCompare(b.title);
+  });
 }
 
 // === LOOKUP SINGLE DATABASE (manual add) ===
