@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      padding: 24px 28px;
+      background: #f8f9fb;
+      color: #1a1a2e;
+    }
+    h1 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      margin-bottom: 4px;
+    }
+    .sub {
+      color: #6b7280;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+    .card-desc {
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 12px;
+    }
+    input[type="password"], input[type="text"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 2px solid #e5e7eb;
+      border-radius: 10px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus { border-color: #6366f1; }
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn:disabled { opacity: 0.5; cursor: default; }
+    .btn-primary { background: #6366f1; color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: #4f46e5; }
+    .btn-secondary { background: #f3f4f6; color: #374151; }
+    .btn-secondary:hover:not(:disabled) { background: #e5e7eb; }
+    .btn-sm { padding: 6px 14px; font-size: 12px; }
+    .btn-success { background: #10b981; color: #fff; }
+    .btn-success:hover:not(:disabled) { background: #059669; }
+    .log {
+      margin-top: 10px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.5;
+    }
+    .log-ok { background: #ecfdf5; color: #065f46; }
+    .log-err { background: #fef2f2; color: #991b1b; }
+    .log-info { background: #eef2ff; color: #4338ca; }
+    .hide { display: none; }
+    .db-controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .db-count {
+      font-size: 12px;
+      font-weight: 600;
+      color: #6b7280;
+      background: #f3f4f6;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+    .search-box {
+      margin-bottom: 12px;
+    }
+    .search-box input {
+      padding: 8px 14px 8px 36px;
+      font-size: 12px;
+      background: #fff url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%239ca3af" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>') 12px center no-repeat;
+    }
+    .db-list {
+      max-height: 260px;
+      overflow-y: auto;
+      border-radius: 10px;
+      border: 1px solid #f3f4f6;
+    }
+    .db-list::-webkit-scrollbar { width: 5px; }
+    .db-list::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+    .db-item {
+      display: flex;
+      align-items: center;
+      padding: 10px 14px;
+      border-bottom: 1px solid #f9fafb;
+      gap: 10px;
+    }
+    .db-item:last-child { border-bottom: none; }
+    .db-item:hover { background: #f9fafb; }
+    .db-item input[type="checkbox"] {
+      width: 16px; height: 16px;
+      accent-color: #6366f1;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .db-name {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .db-sheet {
+      flex-shrink: 0;
+    }
+    .db-sheet input {
+      width: 120px;
+      padding: 5px 8px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 6px;
+      font-size: 11px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 500;
+      outline: none;
+    }
+    .db-sheet input:focus { border-color: #6366f1; }
+    .db-type select {
+      padding: 5px 24px 5px 8px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      outline: none;
+      background: #fff;
+      cursor: pointer;
+      appearance: none;
+      background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="%236b7280" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>');
+      background-repeat: no-repeat;
+      background-position: right 6px center;
+    }
+    .db-type select.public { border-color: #10b981; color: #065f46; }
+    .db-type select.private { border-color: #f59e0b; color: #92400e; }
+    .empty {
+      padding: 32px 16px;
+      text-align: center;
+      color: #9ca3af;
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.6;
+    }
+    .footer {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .footer .btn-save { flex: 1; }
+    .toast {
+      position: fixed;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 8px 18px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
+    .toast-ok { background: #10b981; color: #fff; }
+    .toast-err { background: #ef4444; color: #fff; }
+  </style>
+</head>
+<body>
+  <h1>Notion Sync</h1>
+  <p class="sub">Hubungkan Notion ke Google Sheet</p>
+
+  <!-- API Key section -->
+  <div class="card">
+    <div class="card-title">API Key</div>
+    <div class="card-desc">
+      <a href="https://www.notion.so/my-integrations" target="_blank" style="color:#6366f1;font-weight:600;">notion.so/my-integrations</a>
+      → + New Integration → copy Secret
+    </div>
+    <div style="display:flex;gap:8px;">
+      <input type="password" id="apiKey" placeholder="secret_xxxxxxxxxxxxx" style="flex:1;" autocomplete="off" />
+      <button class="btn btn-primary" id="btnTest" onclick="connect()">Connect</button>
+    </div>
+    <div id="logApi" class="log log-info hide">Masukkan API key, klik Connect.</div>
+  </div>
+
+  <!-- Database section -->
+  <div id="dbSection" class="hide">
+    <div class="db-controls">
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-secondary btn-sm" onclick="selAll(true)">Pilih Semua</button>
+        <button class="btn btn-secondary btn-sm" onclick="selAll(false)">Hapus</button>
+        <button class="btn btn-secondary btn-sm" onclick="reconnect()">↻ Refresh</button>
+      </div>
+      <span class="db-count" id="dbCount">0/0</span>
+    </div>
+    <div class="search-box">
+      <input type="text" id="search" placeholder="Cari..." oninput="filterDB()" />
+    </div>
+    <div class="db-list" id="dbList">
+      <div class="empty">Memuat database...</div>
+    </div>
+    <div class="footer">
+      <button class="btn btn-success btn-save" id="btnSave" onclick="save()">Simpan &amp; Tutup</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    var allDBs = [];
+
+    function connect() {
+      var key = document.getElementById('apiKey').value.trim();
+      if (!key) { showLog('logApi', 'Masukkan API key', 'err'); return; }
+
+      document.getElementById('btnTest').disabled = true;
+      showLog('logApi', 'Menghubungkan...', 'info');
+
+      google.script.run
+        .withSuccessHandler(function(r) {
+          document.getElementById('btnTest').disabled = false;
+          if (r.ok) {
+            showLog('logApi', 'Terhubung sebagai ' + r.name, 'ok');
+            fetchDBs();
+          } else {
+            showLog('logApi', 'Gagal: ' + r.error, 'err');
+          }
+        })
+        .withFailureHandler(function(e) {
+          document.getElementById('btnTest').disabled = false;
+          showLog('logApi', 'Error: ' + e.message, 'err');
+        })
+        .testConnection(key);
+    }
+
+    function fetchDBs() {
+      showLog('logApi', 'Memuat daftar database...', 'info');
+      google.script.run
+        .withSuccessHandler(function(dbs) {
+          document.getElementById('logApi').classList.add('hide');
+          document.getElementById('dbSection').classList.remove('hide');
+          renderDBs(dbs);
+        })
+        .withFailureHandler(function(e) {
+          showLog('logApi', 'Gagal ambil database: ' + e.message, 'err');
+        })
+        .fetchAllDatabases();
+    }
+
+    function renderDBs(dbs) {
+      allDBs = dbs;
+      var list = document.getElementById('dbList');
+
+      if (dbs.length === 0) {
+        list.innerHTML = '<div class="empty">Tidak ada database ditemukan.<br><br>Buka tiap database Notion → <b>···</b> → <b>Connections</b><br>→ tambahkan integration "<b>Sheets Sync</b>"<br><br>Klik <b>↻ Refresh</b> setelah selesai.</div>';
+        return;
+      }
+
+      list.innerHTML = dbs.map(function(db) {
+        var sheet = db.title.replace(/[\/\\\?\*\[\]]/g, '_');
+        return '<div class="db-item" data-id="' + db.id + '">' +
+          '<input type="checkbox" checked onchange="updCount()" />' +
+          '<div class="db-name">' + esc(db.title) + '</div>' +
+          '<div class="db-sheet"><input type="text" value="' + esc(sheet) + '" onchange="updCount()" /></div>' +
+          '<div class="db-type"><select class="public" onchange="updType(this)"><option value="public">Public</option><option value="private">Private</option></select></div>' +
+        '</div>';
+      }).join('');
+
+      updCount();
+    }
+
+    function updType(sel) {
+      sel.className = sel.value;
+    }
+
+    function updCount() {
+      var total = document.querySelectorAll('.db-item').length;
+      var cek = document.querySelectorAll('.db-item input[type="checkbox"]:checked').length;
+      document.getElementById('dbCount').textContent = cek + '/' + total;
+    }
+
+    function selAll(v) {
+      document.querySelectorAll('.db-item input[type="checkbox"]').forEach(function(cb) { cb.checked = v; });
+      updCount();
+    }
+
+    function reconnect() {
+      document.getElementById('dbList').innerHTML = '<div class="empty">Memuat ulang...</div>';
+      fetchDBs();
+    }
+
+    function filterDB() {
+      var q = document.getElementById('search').value.toLowerCase();
+      document.querySelectorAll('.db-item').forEach(function(el) {
+        el.style.display = el.querySelector('.db-name').textContent.toLowerCase().includes(q) ? 'flex' : 'none';
+      });
+    }
+
+    function save() {
+      var selected = [];
+      document.querySelectorAll('.db-item').forEach(function(el) {
+        if (!el.querySelector('input[type="checkbox"]').checked) return;
+        selected.push({
+          id: el.dataset.id,
+          title: el.querySelector('.db-name').textContent,
+          sheet: el.querySelector('.db-sheet input').value.trim(),
+          type: el.querySelector('.db-type select').value,
+        });
+      });
+
+      if (selected.length === 0) {
+        toast('Pilih minimal 1 database', 'err');
+        return;
+      }
+
+      document.getElementById('btnSave').disabled = true;
+      google.script.run
+        .withSuccessHandler(function(r) {
+          toast(r.count + ' database siap sync!', 'ok');
+          setTimeout(function() { google.script.host.close(); }, 600);
+        })
+        .withFailureHandler(function(e) {
+          toast('Gagal: ' + e.message, 'err');
+          document.getElementById('btnSave').disabled = false;
+        })
+        .saveSelection(selected);
+    }
+
+    function showLog(id, msg, type) {
+      var el = document.getElementById(id);
+      el.className = 'log log-' + type;
+      el.textContent = msg;
+      el.classList.remove('hide');
+    }
+
+    function toast(msg, type) {
+      var t = document.getElementById('toast');
+      t.className = 'toast toast-' + type + ' show';
+      t.textContent = msg;
+      setTimeout(function() { t.classList.remove('show'); }, 2000);
+    }
+
+    function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  </script>
+</body>
+</html>
